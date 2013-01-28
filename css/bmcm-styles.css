@@ -1,0 +1,69 @@
+.bmcm-field {
+	border-top:1px solid #FFF;
+	padding: 6px 0;
+	border-bottom:1px solid #EEE;
+	clear:both;
+}
+	.bmcm-field.first { border-top:0; }
+	.bmcm-field.last { border-bottom:0; }
+	
+	.bmcm-field label,
+	.bmcm-field .description {
+		display:block;
+	}
+	
+	.bmcm-field .label {
+		float:left;
+		padding-top:5px;
+		display:block;
+		width:25%;
+	}
+	.bmcm-field .field {
+		float:left;
+		display:block;
+		width:70%;
+	}
+	
+	.bmcm-field .cbxs {
+		float:left;
+		margin:0;
+		padding:0;
+		list-style:none;
+		background:none;
+	}
+
+.bmcm-field.type-text input,
+.bmcm-field.type-password input {
+	width:45%;
+}
+	.bmcm-field.type-text_small input {
+		width:15%;
+	}
+	.bmcm-field.type-text_medium input {
+		width:70%;
+	}
+	.bmcm-field.type-textarea textarea,
+	.bmcm-field.type-text_large input {
+		width:95%;
+	}
+.bmcm-field.type-money .field {
+	margin-left:-7px;
+}
+.bmcm-field.type-money input {
+	text-align:right;
+	width:25%;
+}
+.bmcm-field.type-wysiwyg .mceIframeContainer {
+	background:#FFF;
+}
+.bmcm-field.type-upload input.media-reference {
+	width:60%;
+}
+
+.bmcm-field.type-checkbox .field {
+	width:3.5%;
+	padding-top:4px;
+}
+.bmcm-field.type-checkbox .label {
+	width:90%;
+}
