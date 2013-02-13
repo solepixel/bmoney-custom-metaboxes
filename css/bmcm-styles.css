@@ -42,6 +42,12 @@
 	.bmcm-field.type-text_medium input {
 		width:70%;
 	}
+	.bmcm-field.type-file input[type="text"],
+	.bmcm-field.type-upload input[type="text"],
+	.bmcm-field.type-image input[type="text"] {
+		width:75%;
+	}
+	
 	.bmcm-field.type-textarea textarea,
 	.bmcm-field.type-text_large input,
 	.bmcm-field.type-text_email input {

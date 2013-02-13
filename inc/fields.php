@@ -142,7 +142,11 @@ function bmcm_upload($key, $field, $post, $bmcm){
 	$output = '<div class="upload_wrap">';
 		$output .= '<span class="label">'.$title.'</span>';
 		$output .= '<span class="field">';
-			$output .= '<input type="text" name="'.$name.'" value="'.$value.'" class="media-reference" />';
+			$output .= '<input type="text" name="'.$name.'" class="media-reference"';
+			if($value || $value === '0'){
+				$output .= 'value="'.$value.'"';
+			}
+			$output .= ' />';
 			$output .= '<input type="button" value="Upload Media" class="button bmcm-media" />';
 		$output .= '</span>';
 		if($description){

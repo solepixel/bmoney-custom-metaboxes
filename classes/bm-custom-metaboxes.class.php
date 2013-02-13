@@ -69,10 +69,11 @@ class BM_Custom_Metaboxes {
 			
 			require_once(BMCM_PATH.'field-filters.php');
 			
-			wp_register_style('bmcm-styles', BMCM_DIR.'/css/bmcm-styles.css', array(), BMCM_VERSION);
-			wp_register_script('bmcm-scripts', BMCM_DIR.'/js/bmcm-scripts.js', array('jquery'), BMCM_VERSION);
-	        wp_register_script('bmcm-media', BMCM_DIR.'/js/media.js', array('jquery'), BMCM_VERSION);
-			
+			wp_register_style('bmcm-styles', BMCM_DIR.'css/bmcm-styles.css', array(), BMCM_VERSION);
+			wp_register_script('bmcm-scripts', BMCM_DIR.'js/bmcm-scripts.js', array('jquery'), BMCM_VERSION);
+	        wp_register_script('bmcm-media', BMCM_DIR.'js/media.js', array('jquery','media-upload','media-views'), BMCM_VERSION);
+	        wp_localize_script( 'bmcm-media', 'bmcm_media_vars', $this->js_vars);
+				
 			#add_action('admin_menu', array($this, '_admin_menu'));
 			add_action('admin_init', array($this, 'setup_metaboxes'));
 			add_action('save_post', array($this, 'save_values') );
@@ -86,11 +87,10 @@ class BM_Custom_Metaboxes {
 	 * @return void
 	 */
 	function enqueue_admin_scripts(){
+		wp_enqueue_media();
 		wp_enqueue_style('bmcm-styles');
 		wp_enqueue_script('bmcm-scripts');
-		wp_enqueue_script('bmcm-media-vars');
 		wp_enqueue_script('bmcm-media');
-		wp_localize_script( 'bmcm-media-vars', 'bmcm_media_vars', $this->js_vars);
 	}
 	
 	/**
@@ -147,33 +147,33 @@ class BM_Custom_Metaboxes {
 	 * @return void
 	 */
 	function build_metaboxes(){
-		
 		if(count($this->metaboxes)){
+			
 			add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
-		}
-		
-		foreach($this->metaboxes as $index => $metabox){
 			
-			if(!isset($metabox['id'])) $metabox['id'] = uniqid('bmcm_');
-			if(!isset($metabox['title'])) $metabox['title'] = 'Untitled Metabox';
-			if(!isset($metabox['post_type'])) $metabox['post_type'] = array('post');
-			if(!isset($metabox['context'])) $metabox['context'] = 'normal';
-			if(!isset($metabox['priority'])) $metabox['priority'] = 'high';
-			
-			if(!is_array($metabox['post_type'])){
-				$metabox['post_type'] = array($metabox['post_type']);
-			}
-			
-			foreach($metabox['post_type'] as $post_type){
-				add_meta_box(
-					$metabox['id'],
-					$metabox['title'],
-					array(&$this, 'metabox_callback'),
-					$post_type,
-					$metabox['context'],
-					$metabox['priority'],
-					$metabox['fields']
-				);
+			foreach($this->metaboxes as $index => $metabox){
+				
+				if(!isset($metabox['id'])) $metabox['id'] = uniqid('bmcm_');
+				if(!isset($metabox['title'])) $metabox['title'] = 'Untitled Metabox';
+				if(!isset($metabox['post_type'])) $metabox['post_type'] = array('post');
+				if(!isset($metabox['context'])) $metabox['context'] = 'normal';
+				if(!isset($metabox['priority'])) $metabox['priority'] = 'high';
+				
+				if(!is_array($metabox['post_type'])){
+					$metabox['post_type'] = array($metabox['post_type']);
+				}
+				
+				foreach($metabox['post_type'] as $post_type){
+					add_meta_box(
+						$metabox['id'],
+						$metabox['title'],
+						array(&$this, 'metabox_callback'),
+						$post_type,
+						$metabox['context'],
+						$metabox['priority'],
+						$metabox['fields']
+					);
+				}
 			}
 		}
 	}
