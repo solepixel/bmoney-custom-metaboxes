@@ -4,11 +4,12 @@ BMoney Custom Metaboxes
 ~Current Version:1.1~
 
 Metaboxes are easy to add. Simply add a filter in your hook/theme:
-<?php add_filter('bmcm_metaboxes', 'my_metabox_callback_function'); ?>
+```php
+add_filter('bmcm_metaboxes', 'my_metabox_callback_function');
+```
 
 Then setup your callback function to add a metabox. This is the recommended setup:
-<?php
-
+```php
 function my_custom_post_type_fields(){
 	return array(
 		'_test_field_one' => array(
@@ -100,8 +101,7 @@ function my_metabox_callback_function($metaboxes=array()){
 	
 	return $metaboxes;
 }
-
-?>
+```
 
 
 Actions
