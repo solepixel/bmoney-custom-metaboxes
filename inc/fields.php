@@ -13,6 +13,13 @@ function bmcm_wrap_field($output, $field){
 	return $ret;
 }
 
+
+function bmcm_section_break($key, $field, $post, $bmcm){
+	extract($field);
+	$output = '<hr id="'.$id.'" class="section-break" />';
+	return $output;
+}
+
 function bmcm_text($key, $field, $post, $bmcm){
 	extract($field);
 	$type = $type == 'password' ? $type : 'text';
@@ -20,7 +27,10 @@ function bmcm_text($key, $field, $post, $bmcm){
 		$output .= '<span class="label">'.$title.'</span>';
 		$output .= '<span class="field">';
 		if($before) $output .= '<span class="before">'.$before.'</span>';
-		$output .= '<input type="'.$type.'" name="'.$name.'" value="'.$value.'"';
+		$output .= '<input type="'.$type.'" name="'.$name.'"';
+		if($value || $value === '0'){
+			$output .= 'value="'.$value.'"';
+		}
 		$output .= bmcm_attributes($attributes);
 		$output .= '/>';
 		if($after) $output .= '<span class="after">'.$after.'</span>';
@@ -49,17 +59,31 @@ function bmcm_textarea($key, $field, $post, $bmcm){
 
 function bmcm_select($key, $field, $post, $bmcm){
 	extract($field);
+	$group = NULL;
+	
 	$output = '<label>';
 		$output .= '<span class="label">'.$title.'</span>';
 		$output .= '<span class="field"><select name="'.$name.'"';
 		$output .= bmcm_attributes($attributes);
 		$output .= '>';
 			foreach($options as $opt){
-				list($val, $lbl) = $opt;
-				$output .= '<option value="'.$val.'"';
-					if($val == $value) $output .= ' selected="selected"';
-				$output .= '>'.$lbl.'</option>';
+				extract(bmcm_option_array($opt));
+				if($grp != $group){
+					if($group != NULL) $output .= '</optgroup>';
+					$group = $grp;
+					if($grp && $lbl){
+						$output .= '<optgroup label="'.$lbl.'">';
+					} else {
+						$group = NULL;
+					}
+				} else {
+					$output .= '<option value="'.$val.'"';
+						if($val == $value) $output .= ' selected="selected"';
+						if($disable) $output .= ' disabled="disabled"';
+					$output .= '>'.$lbl.'</option>';
+				}
 			}
+			if($group != NULL) $output .= '</optgroup>';
 		$output .= '</select></span>';
 		if($description){
 			$output .= '<span class="description">'.$description.'</span>';
@@ -97,8 +121,8 @@ function bmcm_checkboxes($key, $field, $post, $bmcm){
 	$output = '<div class="cbx_wrap">';
 		if($title) $output .= '<span class="label">'.$title.'</span>';
 		$output .= '<ul class="cbxs '.$type.'">';
-			foreach($checkboxes as $cbx){
-				list($val, $lbl) = $cbx;
+			foreach($options as $opt){
+				extract(bmcm_option_array($opt));
 				$output .= '<li><label>';
 					$output .= '<input type="'.$type.'" name="'.$name.'" value="'.$val.'"';
 					if(in_array($val, $value)) $output .= ' checked="checked"';

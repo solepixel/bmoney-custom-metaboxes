@@ -30,6 +30,7 @@ class BM_Custom_Metaboxes {
 	 */
 	function initialize(){
 		add_action( 'init', array($this, '_init'));
+		add_action( 'admin_init', array($this, 'build_metaboxes'), 9999 );
 	}
 	
 	/**
@@ -56,8 +57,6 @@ class BM_Custom_Metaboxes {
 				);
 				new WP_GitHub_Updater($config);
 			}
-			
-			$this->metaboxes = apply_filters('bmcm_metaboxes', $this->metaboxes);
 			
 			$this->always_serialize = array(
 				'checkboxes'
@@ -129,7 +128,7 @@ class BM_Custom_Metaboxes {
 			add_action('admin_notices', array($this, '_settings_updated'));
 		}
 		
-		include(BMPTC_PATH.'/admin/settings.php');
+		include(BMCM_PATH.'/admin/settings.php');
 	}
 	
 	/**
@@ -138,24 +137,44 @@ class BM_Custom_Metaboxes {
 	 * @return void
 	 */
 	function setup_metaboxes(){
+		$this->metaboxes = apply_filters('bmcm_metaboxes', $this->metaboxes);
+	}
+	
+	
+	/**
+	 * BM_Custom_Metaboxes::build_metaboxes()
+	 * 
+	 * @return void
+	 */
+	function build_metaboxes(){
+		
 		if(count($this->metaboxes)){
 			add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
 		}
 		
 		foreach($this->metaboxes as $index => $metabox){
 			
+			if(!isset($metabox['id'])) $metabox['id'] = uniqid('bmcm_');
+			if(!isset($metabox['title'])) $metabox['title'] = 'Untitled Metabox';
+			if(!isset($metabox['post_type'])) $metabox['post_type'] = array('post');
 			if(!isset($metabox['context'])) $metabox['context'] = 'normal';
 			if(!isset($metabox['priority'])) $metabox['priority'] = 'high';
 			
-			add_meta_box(
-				$metabox['id'],
-				$metabox['title'],
-				array(&$this, 'metabox_callback'),
-				$metabox['post_type'],
-				$metabox['context'],
-				$metabox['priority'],
-				$metabox['fields']
-			);
+			if(!is_array($metabox['post_type'])){
+				$metabox['post_type'] = array($metabox['post_type']);
+			}
+			
+			foreach($metabox['post_type'] as $post_type){
+				add_meta_box(
+					$metabox['id'],
+					$metabox['title'],
+					array(&$this, 'metabox_callback'),
+					$post_type,
+					$metabox['context'],
+					$metabox['priority'],
+					$metabox['fields']
+				);
+			}
 		}
 	}
 	
@@ -180,8 +199,6 @@ class BM_Custom_Metaboxes {
 			'default' => '',
 			'serialize' => false,
 			'options' => array(),
-			'checkboxes' => array(),
-			'attributes' => array(),
 			'settings' => array()
 		);
 		
@@ -192,7 +209,8 @@ class BM_Custom_Metaboxes {
 		$index = 0;
 		$total_fields = count($fields);
 		foreach($fields as $key => $field){
-			if(!$field['type']) continue;
+			
+			$field['type'] = $this->standardize_type($field['type']);
 			
 			$field = array_merge($defaults, $field);
 			
@@ -209,8 +227,25 @@ class BM_Custom_Metaboxes {
 			
 			$field['name'] = BMCM_OPT_PREFIX.$field['id'];
 			
-			if($field['serialize']){
+			if($field['serialize'] && substr($field['name'], -2) != '[]'){
 				$field['name'] = $field['name'].'[]';
+			}
+			
+			if(isset($field['checkboxes'])){
+				$field['options'] = $field['checkboxes'];
+				unset($field['checkboxes']);
+			}
+			if(isset($field['radios'])){
+				$field['options'] = $field['radios'];
+				unset($field['radios']);
+			}
+			
+			if(is_string($field['options']) && function_exists($field['options'])){
+				$field['options'] = call_user_func($field['options'], $field);
+			} elseif(!is_array($field['options'])) {
+				$field['options'] = array(
+					array('value' => '', 'label' => __('INVALID OPTIONS PARAMETER', 'bmcm'))
+				);
 			}
 			
 			$field['value'] = $this->set_value($field, $post);
@@ -244,6 +279,18 @@ class BM_Custom_Metaboxes {
 		return $id;
 	}
 	
+	function standardize_type($type){
+		if(substr($type, -3) == '_sm'){
+			$type = str_lreplace('_sm', '_small', $type);
+		} elseif(substr($type, -4) == '_med'){
+			$type = str_lreplace('_med', '_medium', $type);
+		} elseif(substr($type, -3) == '_lg'){
+			$type = str_lreplace('_lg', '_large', $type);
+		}
+		if(!$type) $type = 'text';
+		return $type;
+	}
+	
 	/**
 	 * BM_Custom_Metaboxes::set_value()
 	 * 
@@ -265,11 +312,11 @@ class BM_Custom_Metaboxes {
 			$value = $_POST[BMCM_OPT_PREFIX.$field['id']];
 		}
 		
-		if($field['type'] == 'money'){
-			$value = number_format($value, 2);
+		if($field['type'] == 'money' && $value){
+			$value = number_format((double)$value, 2);
 		}
 		
-		return $value;
+		return apply_filters('bmcm_value_'.$field['id'], $value, $field, $this);
 	}
 	
 	/**
@@ -287,6 +334,7 @@ class BM_Custom_Metaboxes {
 					if(($del = array_search($name, $reset_fields)) !== false) {
 						unset($reset_fields[$del]);
 					}
+					$v = apply_filters('bmcm_update_meta', $v, $post_id, $name, $this);
 					update_post_meta( $post_id, $name, $v );
 				}
 			}

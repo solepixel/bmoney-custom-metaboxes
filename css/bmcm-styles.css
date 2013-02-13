@@ -14,14 +14,14 @@
 	
 	.bmcm-field .label {
 		float:left;
-		padding-top:5px;
+		padding:6px 0 5px;
 		display:block;
 		width:25%;
 	}
 	.bmcm-field .field {
 		float:left;
 		display:block;
-		width:70%;
+		width:72%;
 	}
 	
 	.bmcm-field .cbxs {
@@ -43,7 +43,8 @@
 		width:70%;
 	}
 	.bmcm-field.type-textarea textarea,
-	.bmcm-field.type-text_large input {
+	.bmcm-field.type-text_large input,
+	.bmcm-field.type-text_email input {
 		width:95%;
 	}
 .bmcm-field.type-money .field {
@@ -66,4 +67,12 @@
 }
 .bmcm-field.type-checkbox .label {
 	width:90%;
+}
+.bmcm-field.type-section_break {
+	background:#DDD;
+	padding:0;
+	line-height:.25em;
+}
+.bmcm-field.type-section_break hr.section-break {
+	display:none;
 }
