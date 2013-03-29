@@ -199,7 +199,8 @@ class BM_Custom_Metaboxes {
 			'default' => '',
 			'serialize' => false,
 			'options' => array(),
-			'settings' => array()
+			'settings' => array(),
+			'attributes' => array()
 		);
 		
 		$settings = array(
