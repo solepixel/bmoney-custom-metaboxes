@@ -1,7 +1,7 @@
 BMoney Custom Metaboxes
 =================
 
-~Current Version:1.5~
+~Current Version:1.51~
 
 Metaboxes are easy to add. Simply add a filter in your hook/theme:
 ```php
@@ -135,6 +135,9 @@ Filters
 
 Changelog
 ===========
+### 1.51
+* Added URL field type
+
 ### 1.5
 * Many bug fixes
 * CSS changes

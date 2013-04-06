@@ -71,6 +71,7 @@
 	
 	.bmcm-field.type-textarea textarea,
 	.bmcm-field.type-text_large input,
+	.bmcm-field.type-url input,
 	.bmcm-field.type-email input {
 		width:95%;
 	}

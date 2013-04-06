@@ -4,17 +4,11 @@ add_filter('bmcm_wrap_field', 'bmcm_wrap_field', 10, 2);
 
 add_filter('bmcm_output_field_section_break', 'bmcm_section_break', 10, 4);
 
-add_filter('bmcm_output_field_multi', 'bmcm_multi', 10, 4);
-add_filter('bmcm_output_field_multiple', 'bmcm_multi', 10, 4);
-add_filter('bmcm_output_field_repeat', 'bmcm_multi', 10, 4);
-add_filter('bmcm_output_field_repeatable', 'bmcm_multi', 10, 4);
-
-add_filter('bmcm_output_field_multi_additional', 'bmcm_multi', 10, 4);
-
 add_filter('bmcm_output_field_text', 'bmcm_text', 10, 4);
 add_filter('bmcm_output_field_text_small', 'bmcm_text', 10, 4);
 add_filter('bmcm_output_field_text_medium', 'bmcm_text', 10, 4);
 add_filter('bmcm_output_field_text_large', 'bmcm_text', 10, 4);
+add_filter('bmcm_output_field_url', 'bmcm_text', 10, 4);
 add_filter('bmcm_output_field_password', 'bmcm_text', 10, 4);
 add_filter('bmcm_output_field_money', 'bmcm_text', 10, 4);
 
@@ -37,6 +31,13 @@ add_filter('bmcm_output_field_wysiwyg', 'bmcm_wysiwyg', 10, 4);
 add_filter('bmcm_output_field_date', 'bmcm_text', 10, 4);
 
 add_filter('bmcm_output_field_slider', 'bmcm_slider', 10, 4);
+
+add_filter('bmcm_output_field_multi', 'bmcm_multi', 10, 4);
+add_filter('bmcm_output_field_multiple', 'bmcm_multi', 10, 4);
+add_filter('bmcm_output_field_repeat', 'bmcm_multi', 10, 4);
+add_filter('bmcm_output_field_repeatable', 'bmcm_multi', 10, 4);
+
+add_filter('bmcm_output_field_multi_additional', 'bmcm_multi', 10, 4);
 
 //TODO: Add more stock fields
 //		- date/time
