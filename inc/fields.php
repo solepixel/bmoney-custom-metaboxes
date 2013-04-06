@@ -16,7 +16,7 @@ function bmcm_wrap_field($output, $field){
 	$index = isset($field['tab']) ? $field['_tab_index'] : $field['_index'];
 	$total = isset($field['tab']) ? $field['_tab_total'] : $field['_total'];
 	
-	$class = array('field-'.$field['id'], 'type-'.$type,'total-'.$total);
+	$class = array('field-'.$field['id'], 'type-'.$type);
 		
 	if($index == 0) $class[] = 'first';
 	$class[] = ($index & 1) ? 'odd' : 'even';
