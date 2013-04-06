@@ -1,7 +1,7 @@
 BMoney Custom Metaboxes
 =================
 
-~Current Version:1.2~
+~Current Version:1.5~
 
 Metaboxes are easy to add. Simply add a filter in your hook/theme:
 ```php
@@ -84,6 +84,10 @@ function my_custom_post_type_fields(){
 		'_test_field_70' => array(
 			'type' => 'checkbox',
 			'title' => 'I agree to the terms and conditions in the giant text box above that there is no way I actually read.'
+		),
+		'_test_field_80' => array(
+			'type' => 'date',
+			'title' => 'Sample Date'
 		)
 	);
 }
@@ -131,6 +135,25 @@ Filters
 
 Changelog
 ===========
+### 1.5
+* Many bug fixes
+* CSS changes
+* Added meta box class support
+* Added "multi" field with sorting
+* Added tabs support
+* Rewrote Media/Upload Javascript code with more usability
+* Additional CSS classes on each item
+
+### 1.4
+* Better Upload Field Interface
+* Slider field type (jquery-ui)
+* Taxonomy field type
+* CSS Adjustments
+* PHP Notice fix
+
+### 1.3
+* Added date field support
+
 ### 1.2
 * Fixed bug with Media Uploader
 
