@@ -3,6 +3,8 @@ BMoney Custom Metaboxes
 
 ~Current Version:1.51~
 
+Documentation: <https://github.com/solepixel/bmoney-custom-metaboxes/wiki>
+
 Metaboxes are easy to add. Simply add a filter in your hook/theme:
 ```php
 add_filter('bmcm_metaboxes', 'my_metabox_callback_function');
