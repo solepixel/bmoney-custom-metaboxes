@@ -21,6 +21,7 @@ function bmcm_wrap_field($output, $field){
 	if($index == 0) $class[] = 'first';
 	$class[] = ($index & 1) ? 'odd' : 'even';
 	if($index+1 == $total) $class[] = 'last';
+	if($field['type'] == 'multi_additional') $class[] = 'additional';
 	
 	if(!$field['title']) $class[] = 'no-label';
 	

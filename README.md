@@ -1,7 +1,9 @@
 BMoney Custom Metaboxes
 =================
 
-~Current Version:1.51~
+~Current Version:1.52~
+
+Documentation: <https://github.com/solepixel/bmoney-custom-metaboxes/wiki>
 
 Documentation: <https://github.com/solepixel/bmoney-custom-metaboxes/wiki>
 
@@ -137,6 +139,11 @@ Filters
 
 Changelog
 ===========
+### 1.52
+* Added Number field type
+* Enhancements to repeatable field types
+* Minor adjustments/code cleanup
+
 ### 1.51
 * Added URL field type
 

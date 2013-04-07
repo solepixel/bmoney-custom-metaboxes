@@ -213,9 +213,12 @@ class BM_Custom_Metaboxes {
 			$this->index++;
 		}
 		
-		$this->add_tab_totals();
+		$total_tabs = count($this->tabs);
 		
-		if(count($this->tabs)){
+		if($total_tabs > 1){
+			
+			$this->add_tab_totals();
+			
 			echo '<div class="bmcm-tab-wrap">';
 			echo '<ul class="bmcm-tabs">';
 			$i = 0;
@@ -226,32 +229,34 @@ class BM_Custom_Metaboxes {
 				if($i == 0) $classes[] = 'active';
 				if($i == $total_tabs-1) $classes[] = 'last';
 				$class = (count($classes)) ? ' class="'.implode(' ', $classes).'"' : '';
-				echo '<li'.$class.'><a href="#'.$tab_id.'" class="tab-'.$tab_id.'">'.$tab_label.'</a></li>';
+				echo '<li'.$class.'><a href="#'.$tab_id.'" class="'.$tab_id.'-tab">'.$tab_label.'</a></li>';
 				$i++;
 			}
 			echo '</ul>';
+			
+			$last_tab = NULL;
+			$tab_contents = '';
 		}
-		
-		$last_tab = NULL;
-		$tab_contents = '';
 		
 		foreach($this->fields as $key => $field){
 			
-			if(isset($field['tab'])){
+			if(isset($field['tab']) && $total_tabs > 1){
 				if($field['tab'] != $last_tab){
 					if($last_tab !== NULL){
 						$tab_contents .= '</div>';
 					}
-					$tab_contents .= '<div class="bmcm-tab tab-'.$field['tab'].'"';
-					if($last_tab !== NULL) $tab_contents .= ' style="display:none;"';
-					$tab_contents .= '>';
+					if($field['tab']){
+						$tab_contents .= '<div class="bmcm-tab tab-'.$field['tab'].'"';
+						if($last_tab !== NULL) $tab_contents .= ' style="display:none;"';
+						$tab_contents .= '>';
+					}
 				}
 			}
 			
 			$output = apply_filters('bmcm_output_field_'.$field['type'], $key, $field, $this->post, $this);
 			$element = apply_filters('bmcm_wrap_field', $output, $field);
 			
-			if(isset($field['tab'])){
+			if(isset($field['tab']) && $total_tabs > 1){
 				$tab_contents .= $element;
 				$last_tab = $field['tab'];
 			} else {
@@ -259,16 +264,15 @@ class BM_Custom_Metaboxes {
 			}
 		}
 		
-		if($last_tab !== NULL){
-			$tab_contents .= '</div>';
-		}
-		
-		if($tab_contents){
-			echo '<div class="bmcm-tab-contents">';
-				echo $tab_contents;
-			echo '</div>
-			<div class="clear"><!-- .clear --></div>
-			</div>';
+		if($total_tabs > 1){
+			if($last_tab !== NULL) $tab_contents .= '</div>';
+			if($tab_contents){
+				echo '<div class="bmcm-tab-contents">';
+					echo $tab_contents;
+				echo '</div>
+				<div class="clear"><!-- .clear --></div>
+				</div>';
+			}
 		}
 		
 		echo '<div class="clear"><!-- .clear --></div>';
@@ -408,6 +412,9 @@ class BM_Custom_Metaboxes {
 			$item_field['is_multi'] = true;
 			$field['fields'][$item_key] = $this->cleanup_field($item_field, $item_key);
 			$field['fields'][$item_key]['name'] = str_replace('[]', '', $field['name']).'['.$item_id.'][]';
+			if($this->total_fields == 1){
+				$field['fields'][$item_key]['title'] = $field['title'];
+			}
 			$this->index++;
 		}
 		
@@ -417,6 +424,9 @@ class BM_Custom_Metaboxes {
 		$additional = '';
 		
 		if(is_array($field['value'])){
+			
+			$number_of_fields = count($field['fields']);
+			
 			foreach($field['value'] as $i => $val){
 				if($i == 0){
 					// our first fields are already there, re-use them

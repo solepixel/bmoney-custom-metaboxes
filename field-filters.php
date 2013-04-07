@@ -8,9 +8,10 @@ add_filter('bmcm_output_field_text', 'bmcm_text', 10, 4);
 add_filter('bmcm_output_field_text_small', 'bmcm_text', 10, 4);
 add_filter('bmcm_output_field_text_medium', 'bmcm_text', 10, 4);
 add_filter('bmcm_output_field_text_large', 'bmcm_text', 10, 4);
+add_filter('bmcm_output_field_number', 'bmcm_text', 10, 4);
 add_filter('bmcm_output_field_url', 'bmcm_text', 10, 4);
-add_filter('bmcm_output_field_password', 'bmcm_text', 10, 4);
 add_filter('bmcm_output_field_money', 'bmcm_text', 10, 4);
+add_filter('bmcm_output_field_password', 'bmcm_text', 10, 4);
 
 add_filter('bmcm_output_field_email', 'bmcm_text', 10, 4);
 

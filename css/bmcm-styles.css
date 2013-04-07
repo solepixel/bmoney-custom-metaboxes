@@ -149,7 +149,14 @@
 
 /* tabs */
 .bmcm-tab-wrap {
-	background:#F1F1F1;
+	background: #f1f1f1; /* Old browsers */
+	background: -moz-linear-gradient(left,  #f1f1f1 15.1%, #f8f8f8 15.2%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, right top, color-stop(15.1%,#f1f1f1), color-stop(15.2%,#f8f8f8)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(left,  #f1f1f1 15.1%,#f8f8f8 15.2%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(left,  #f1f1f1 15.1%,#f8f8f8 15.2%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(left,  #f1f1f1 15.1%,#f8f8f8 15.2%); /* IE10+ */
+	background: linear-gradient(to right,  #f1f1f1 15.1%,#f8f8f8 15.2%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f1f1f1', endColorstr='#f8f8f8',GradientType=1 ); /* IE6-9 */
 }
 	.bmcm-tabs, .bmcm-tab-contents {
 		-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
@@ -170,22 +177,22 @@
 	}
 	.bmcm-tabs a {
 		display:block;
-		padding:6px 6px 6px 8px;
+		padding:6px 3px 6px 8px;
 		text-decoration:none;
 		border-right:1px solid #DFDFDF;
+		border-top:1px solid transparent;
+		border-bottom:1px solid transparent;
 		outline:none;
 	}
 	.bmcm-tabs .active a {
 		color:#555555;
 		background:#F8F8F8;
-		border-right:1px solid #F8F8F8;
-		border-top:1px solid #DFDFDF;
-		border-bottom:1px solid #DFDFDF;
+		border-right-color:#F8F8F8;
+		border-top-color:#DFDFDF;
+		border-bottom-color:#DFDFDF;
 	}
 	.bmcm-tabs .first a {
 		padding-top:7px;
-	}
-	.bmcm-tabs .active.first a {
 		border-top:0;
 	}
 	.bmcm-tab-contents {

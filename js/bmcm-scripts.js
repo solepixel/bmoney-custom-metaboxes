@@ -66,6 +66,13 @@ jQuery(function($) {
 			$collection.find('.multi-remove').hide();
 		}
 		
+		var $additionals = $collection.find('.type-multi.additional');
+		$.each($additionals, function(a, addl){
+			if($(addl).find('.multi-wrap:first .bmcm-field').length == 1){
+				$('.label', $(addl)).css('visibility','hidden');
+			}
+		})
+		
 		bmcm_bind_buttons();
     });
     
@@ -115,14 +122,20 @@ jQuery(function($) {
     
     function bmcm_reset_styles(){
     	$.each($('.multi-collection'), function(i, el){
-    		$(el).find('.type-multi').removeClass('first odd even last');
-    		$(el).find('.type-multi:first').addClass('first');
-    		$(el).find('.type-multi:odd').addClass('odd');
-    		$(el).find('.type-multi:even').addClass('even');
-    		$(el).find('.type-multi:last').addClass('last');
+    		var $collection = $(el);
+    		
+    		$collection.find('.type-multi').removeClass('first odd even last');
+    		$collection.find('.type-multi:first').addClass('first');
+    		$collection.find('.type-multi:odd').addClass('odd');
+    		$collection.find('.type-multi:even').addClass('even');
+    		$collection.find('.type-multi:last').addClass('last');
+    		
+    		if($collection.find('.multi-wrap:first .bmcm-field').length == 1){
+    			$collection.find('.bmcm-field .label').css('visibility','hidden');
+    			$collection.find('.multi-wrap:first .bmcm-field:first .label').css('visibility','visible');
+    		}
     	});
     }
-    
     
     
     /* tabs */
