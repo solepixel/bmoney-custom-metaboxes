@@ -39,7 +39,7 @@ function my_custom_post_type_fields(){
 			'type' => 'money',
 			'title' => 'Test Field Money'
 		),
-		'' => array(
+		array(
 			'id' => '_test_field_2',
 			'type' => 'textarea',
 			'title' => 'Test Field 2',
