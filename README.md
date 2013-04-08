@@ -14,33 +14,40 @@ Then setup your callback function to add a metabox. This is the recommended setu
 ```php
 function my_custom_post_type_fields(){
 	return array(
-		'_test_field_one' => array(
+		array(
+			'id' => '_test_field_one',
 			'type' => 'text',
 			'title' => 'Test Field One'
 		),
-		'_test_field_two' => array(
+		array(
+			'id' => '_test_field_two',
 			'type' => 'text_small',
 			'title' => 'Test Field Small'
 		),
-		'_test_field_three' => array(
+		array(
+			'id' => '_test_field_three',
 			'type' => 'text_medium',
 			'title' => 'Test Field Medium'
 		),
-		'_test_field_four' => array(
+		array(
+			'id' => '_test_field_four',
 			'type' => 'text_large',
 			'title' => 'Test Field Large'
 		),
-		'_test_field_money' => array(
+		array(
+			'id' => '_test_field_money',
 			'type' => 'money',
 			'title' => 'Test Field Money'
 		),
-		'_test_field_2' => array(
+		'' => array(
+			'id' => '_test_field_2',
 			'type' => 'textarea',
 			'title' => 'Test Field 2',
 			'default' => 'default text',
 			'description' => 'Use this field to enter a lot of text'
 		),
-		'_test_field_3' => array(
+		array(
+			'id' => '_test_field_3',
 			'type' => 'select',
 			'title' => 'Test Field 3',
 			'options' => array( // this also supports a callback function, just pass in the function name as string
@@ -52,7 +59,6 @@ function my_custom_post_type_fields(){
 			'default' => '2'
 		),
 		
-		/* alternate ID syntax */
 		array(
 			'id' => '_test_field_4',
 			'title' => 'Select a Checkbox or Two',
@@ -75,19 +81,23 @@ function my_custom_post_type_fields(){
 				array('label' => 'Dee', 'value' => 'D')
 			)
 		),
-		'_test_field_10' => array(
+		array(
+			'id' => '_test_field_10',
 			'type' => 'wysiwyg',
 			'title' => 'Test WYSIWYG'
 		),
-		'_test_field_50' => array(
+		array(
+			'id' => '_test_field_50',
 			'type' => 'upload', // file also works here, same result
 			'title' => 'Test Upload'
 		),
-		'_test_field_70' => array(
+		array(
+			'id' => '_test_field_70',
 			'type' => 'checkbox',
 			'title' => 'I agree to the terms and conditions in the giant text box above that there is no way I actually read.'
 		),
-		'_test_field_80' => array(
+		array(
+			'id' => '_test_field_80',
 			'type' => 'date',
 			'title' => 'Sample Date'
 		)
