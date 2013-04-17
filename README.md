@@ -13,7 +13,7 @@ add_filter('bmcm_metaboxes', 'my_metabox_callback_function');
 Then setup your callback function to add a metabox. This is the recommended setup:
 ```php
 function my_custom_post_type_fields(){
-	return array(
+	return apply_filters('my_metabox_field_filter', array(
 		array(
 			'id' => '_test_field_one',
 			'type' => 'text',
@@ -101,12 +101,12 @@ function my_custom_post_type_fields(){
 			'type' => 'date',
 			'title' => 'Sample Date'
 		)
-	);
+	));
 }
 
 function my_metabox_callback_function($metaboxes=array()){
 	
-	$fields = apply_filters('my_metabox_field_filter', my_custom_post_type_fields());
+	$fields = my_custom_post_type_fields();
 	
 	$metaboxes[] = array(
 		'id'		=> 'my_awesome_metabox', // if left blank, one is auto-generated
