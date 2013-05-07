@@ -1,6 +1,8 @@
 BMoney Custom Metaboxes
 =================
 
+This is a plugin for WordPress that allows developers to easily add meta boxes with custom fields into their posts or pages. It was originally inspired by Jared Atchison [Custom Metaboxes and Fields for WordPress](https://github.com/jaredatch/Custom-Metaboxes-and-Fields-for-WordPress) however since the release of WordPress 3.5 I wanted to write my own that allowed the meta boxes to be much more "hookable" as well as compatible with the new Media API. This plugin is requires WordPress 3.5+ and is updated frequently. Please donate (links in the wiki) if you have requests or want to keep this project going! Thanks!
+
 ~Current Version:1.53~
 
 Documentation: <https://github.com/solepixel/bmoney-custom-metaboxes/wiki>
