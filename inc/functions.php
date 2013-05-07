@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * bmcm_attributes()
+ * 
+ * @param mixed $attributes
+ * @return
+ */
 function bmcm_attributes($attributes){
 	$out = '';
 	if(is_array($attributes) && count($attributes) > 0){
@@ -10,6 +16,12 @@ function bmcm_attributes($attributes){
 	return $out;
 }
 
+/**
+ * bmcm_option_array()
+ * 
+ * @param mixed $option
+ * @return
+ */
 function bmcm_option_array($option){
 	$defaults = array('label' => '', 'value' => '', 'disabled' => false, 'group' => NULL);
 	if(!bmcm_is_assoc_array($option)){
@@ -49,10 +61,24 @@ function bmcm_option_array($option){
 	return $array;
 }
 
+/**
+ * bmcm_is_assoc_array()
+ * 
+ * @param mixed $arr
+ * @return
+ */
 function bmcm_is_assoc_array($arr){
 	return array_keys($arr) !== range(0,count($arr) - 1);
 }
 
+/**
+ * str_lreplace()
+ * 
+ * @param mixed $search
+ * @param mixed $replace
+ * @param mixed $subject
+ * @return
+ */
 function str_lreplace($search, $replace, $subject){
     $pos = strrpos($subject, $search);
 
@@ -64,6 +90,12 @@ function str_lreplace($search, $replace, $subject){
     return $subject;
 }
 
+/**
+ * us_states()
+ * 
+ * @param mixed $field
+ * @return
+ */
 function us_states($field=NULL){
 	$states = array(
 		array( 'val' => 'AL', 'lbl' => 'Alabama'),

@@ -11,6 +11,15 @@ class BM_Custom_Metaboxes {
 	var $always_serialize = array();
 	var $metaboxes = array();
 	
+	var $post = NULL;
+	
+	var $tabs = array();
+	var $last_tab = NULL;
+	var $fields = array();
+	var $index = 0;
+	var $tab_index = 0;
+	var $total_fields = 0;
+	
 	var $js_vars = array();
 	var $settings = array();
 	
@@ -41,38 +50,39 @@ class BM_Custom_Metaboxes {
 	function _init(){
 		if(is_admin()){
 			
-			if(class_exists('WP_GitHub_Updater')){
-				$config = array(
-					'slug' => 'bmoney-custom-metaboxes/bmoney-custom-metaboxes.plugin.php', // this is the slug of your plugin
-					'proper_folder_name' => 'bmoney-custom-metaboxes', // this is the name of the folder your plugin lives in
-					'api_url' => 'https://api.github.com/solepixel/bmoney-custom-metaboxes', // the github API url of your github repo
-					'raw_url' => 'https://raw.github.com/solepixel/bmoney-custom-metaboxes/master/', // the github raw url of your github repo
-					'github_url' => 'https://github.com/solepixel/bmoney-custom-metaboxes', // the github url of your github repo
-					'zip_url' => 'https://github.com/solepixel/bmoney-custom-metaboxes/archive/master.zip', // the zip url of the github repo
-					'sslverify' => false, // wether WP should check the validity of the SSL cert when getting an update, see https://github.com/jkudish/WordPress-GitHub-Plugin-Updater/issues/2 and https://github.com/jkudish/WordPress-GitHub-Plugin-Updater/issues/4 for details
-					'requires' => '3.0', // which version of WordPress does your plugin require?
-					'tested' => '3.5', // which version of WordPress is your plugin tested up to?
-					'readme' => 'README.md', // which file to use as the readme for the version number
-					'access_token' => '', // Access private repositories by authorizing under Appearance > Github Updates when this example plugin is installed
-				);
-				new WP_GitHub_Updater($config);
-			}
+			$this->_check_for_updates();
 			
 			$this->always_serialize = array(
-				'checkboxes'
+				'checkboxes',
+				'gallery'
 			);
 			
 			$this->js_vars = array(
-				'title'     => __( 'Upload or Choose Your File', 'bmcm' ), 
-				'button'    => __( 'Use File', 'bmcm' )
+				'defaults'	=> array(
+					'title'     => __( 'Upload or Choose Your File', 'bmcm' ), 
+					'button'    => __( 'Use File', 'bmcm' ),
+					'allow_multiple' => false,
+					'library_type' => '',
+					'target_input' => '.media-reference',
+					'target_label' => '.media-display',
+					'target_image' => '',
+					
+					// for multiples
+					'target_container' => '',
+					'single_markup' => '',
+				
+					'selection_callback'	=> apply_filters('bmcm_js_default_select_callback', ''),
+					'remove_callback'		=> apply_filters('bmcm_js_default_remove_callback', '')
+				),
+				'fields' => array()
             );
 			
 			require_once(BMCM_PATH.'field-filters.php');
 			
 			wp_register_style('bmcm-styles', BMCM_DIR.'css/bmcm-styles.css', array(), BMCM_VERSION);
 			wp_register_script('bmcm-scripts', BMCM_DIR.'js/bmcm-scripts.js', array('jquery'), BMCM_VERSION);
-	        wp_register_script('bmcm-media', BMCM_DIR.'js/media.js', array('jquery','media-upload','media-views'), BMCM_VERSION);
-	        wp_localize_script( 'bmcm-media', 'bmcm_media_vars', $this->js_vars);
+	        wp_register_script('bmcm-media', BMCM_DIR.'js/media.js', array('jquery','media-upload','media-views'), BMCM_VERSION, true);
+	        wp_register_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/flick/jquery-ui.css', array(), '1.9.1');
 				
 			#add_action('admin_menu', array($this, '_admin_menu'));
 			add_action('admin_init', array($this, 'setup_metaboxes'));
@@ -91,6 +101,10 @@ class BM_Custom_Metaboxes {
 		wp_enqueue_style('bmcm-styles');
 		wp_enqueue_script('bmcm-scripts');
 		wp_enqueue_script('bmcm-media');
+		wp_enqueue_script('jquery-ui-datepicker');
+		wp_enqueue_script('jquery-ui-slider');
+		wp_enqueue_script('jquery-ui-tooltip');
+		wp_enqueue_style('jquery-style');
 	}
 	
 	/**
@@ -140,7 +154,7 @@ class BM_Custom_Metaboxes {
 		$this->metaboxes = apply_filters('bmcm_metaboxes', $this->metaboxes);
 	}
 	
-	
+
 	/**
 	 * BM_Custom_Metaboxes::build_metaboxes()
 	 * 
@@ -149,30 +163,54 @@ class BM_Custom_Metaboxes {
 	function build_metaboxes(){
 		if(count($this->metaboxes)){
 			
-			add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
+			global $pagenow;
 			
-			foreach($this->metaboxes as $index => $metabox){
+			// maybe consider some kind of override for this...
+			if($pagenow == 'post.php' || $pagenow == 'post-new.php'){ // we only need to do any of this on post.php and post-new.php
 				
-				if(!isset($metabox['id'])) $metabox['id'] = uniqid('bmcm_');
-				if(!isset($metabox['title'])) $metabox['title'] = 'Untitled Metabox';
-				if(!isset($metabox['post_type'])) $metabox['post_type'] = array('post');
-				if(!isset($metabox['context'])) $metabox['context'] = 'normal';
-				if(!isset($metabox['priority'])) $metabox['priority'] = 'high';
+				add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
 				
-				if(!is_array($metabox['post_type'])){
-					$metabox['post_type'] = array($metabox['post_type']);
-				}
-				
-				foreach($metabox['post_type'] as $post_type){
-					add_meta_box(
-						$metabox['id'],
-						$metabox['title'],
-						array(&$this, 'metabox_callback'),
-						$post_type,
-						$metabox['context'],
-						$metabox['priority'],
-						$metabox['fields']
-					);
+				foreach($this->metaboxes as $index => $metabox){
+					
+					if(!isset($metabox['id'])) $metabox['id'] = uniqid('bmcm_');
+					if(!isset($metabox['title'])) $metabox['title'] = 'Untitled Metabox';
+					if(!isset($metabox['post_type'])) $metabox['post_type'] = array('post');
+					if(!isset($metabox['context'])) $metabox['context'] = 'normal';
+					if(!isset($metabox['priority'])) $metabox['priority'] = 'high';
+					if(!isset($metabox['fields'])) $metabox['fields'] = array();
+					if(!isset($metabox['tabs'])) $metabox['tabs'] = array();
+					
+					// use our default callback.
+					if(!isset($metabox['callback'])) $metabox['callback'] = array(&$this, 'metabox_callback');
+	
+					if(!is_array($metabox['post_type'])){
+						$metabox['post_type'] = array($metabox['post_type']);
+					}
+					
+					//TODO: reconsider this code...
+					$mb_id = str_replace('-','_', $metabox['id']);
+					global ${$mb_id.'_postbox_class'};
+					${$mb_id.'_postbox_class'} = array('bmcm');
+					
+					if(isset($metabox['class'])){
+						if(!is_array($metabox['class'])) $metabox['class'] = array($metabox['class']);
+						${$mb_id.'_postbox_class'} = array_merge(${$mb_id.'_postbox_class'}, $metabox['class']);
+					}
+					
+					foreach($metabox['post_type'] as $post_type){
+						add_filter('postbox_classes_'.$post_type.'_'.$metabox['id'],
+							create_function('', 'global $'.$mb_id.'_postbox_class; return $'.$mb_id.'_postbox_class;') );
+							
+						add_meta_box(
+							$metabox['id'],
+							$metabox['title'],
+							$metabox['callback'],
+							$post_type,
+							$metabox['context'],
+							$metabox['priority'],
+							array('fields' => $metabox['fields'], 'tabs' => $metabox['tabs'])
+						);
+					}
 				}
 			}
 		}
@@ -186,8 +224,94 @@ class BM_Custom_Metaboxes {
 	 * @return void
 	 */
 	function metabox_callback($post, $metabox){
-		$fields = $metabox['args'];
+		$this->fields = $metabox['args']['fields'];
+		$this->tabs = $metabox['args']['tabs'];
+		$this->index = 0;
+		$this->total_fields = count($this->fields);
+		$this->post = $post;
 		
+		foreach($this->fields as $key => $field){
+			$this->fields[$key] = $this->cleanup_field($field, $key);
+			$this->index++;
+		}
+		
+		$total_tabs = count($this->tabs);
+		
+		if($total_tabs > 1){
+			
+			$this->add_tab_totals();
+			
+			echo '<div class="bmcm-tab-wrap">';
+			echo '<ul class="bmcm-tabs">';
+			$i = 0;
+			$total_tabs = count($this->tabs);
+			foreach($this->tabs as $tab_id => $tab_label){
+				$classes = array();
+				if($i == 0) $classes[] = 'first';
+				if($i == 0) $classes[] = 'active';
+				if($i == $total_tabs-1) $classes[] = 'last';
+				$class = (count($classes)) ? ' class="'.implode(' ', $classes).'"' : '';
+				echo '<li'.$class.'>'.apply_filters('bmcm_tab_link', '<a href="#'.$tab_id.'" class="'.$tab_id.'-tab">'.$tab_label.'</a>', $tab_id).'</li>';
+				$i++;
+			}
+			echo '</ul>';
+			
+			$last_tab = NULL;
+			$tab_contents = '';
+		}
+		
+		foreach($this->fields as $key => $field){
+			
+			if(isset($field['tab']) && $total_tabs > 1){
+				if($field['tab'] != $last_tab){
+					if($last_tab !== NULL){
+						$tab_contents .= '</div>';
+					}
+					if($field['tab']){
+						$tab_contents .= '<div class="bmcm-tab tab-'.$field['tab'].'"';
+						if($last_tab !== NULL) $tab_contents .= ' style="display:none;"';
+						$tab_contents .= '>';
+					}
+				}
+			}
+			
+			$output = apply_filters('bmcm_output_field_'.$field['type'], $key, $field, $this->post, $this);
+			$element = apply_filters('bmcm_wrap_field', $output, $field);
+			
+			if(isset($field['tab']) && $total_tabs > 1){
+				$tab_contents .= $element;
+				$last_tab = $field['tab'];
+			} else {
+				echo $element;
+			}
+		}
+		
+		if($total_tabs > 1){
+			if($last_tab !== NULL) $tab_contents .= '</div>';
+			if($tab_contents){
+				echo '<div class="bmcm-tab-contents">';
+					echo $tab_contents;
+				echo '</div>
+				<div class="clear"><!-- .clear --></div>
+				</div>';
+			}
+		}
+		
+		echo '<div class="clear"><!-- .clear --></div>';
+		
+		
+		wp_localize_script('bmcm-media', 'bmcm_media_vars', apply_filters('bmcm_js_vars', $this->js_vars));
+	}
+	
+	
+	/**
+	 * cleanup_field()
+	 * 
+	 * @param mixed $field
+	 * @param mixed $key
+	 * @return
+	 */
+	function cleanup_field($field, $key=NULL){
 		$defaults = array( // avoid PHP notices
 			'id' => '',
 			'name' => '',
@@ -199,65 +323,250 @@ class BM_Custom_Metaboxes {
 			'default' => '',
 			'serialize' => false,
 			'options' => array(),
-			'settings' => array()
+			'settings' => array(),
+			'attributes' => array(),
+			'taxonomy' => '',
+			'callbacks' => array()
 		);
 		
-		$settings = array(
+		$upload_settings = array_merge($this->js_vars['defaults'], array(
+			// no other settings, use defaults
+		));
+		
+		$image_settings = array_merge($this->js_vars['defaults'], array(
+			'library_type' => 'image',
+			'title' => __('Upload or Choose Your Image', 'bmcm'),
+			'button' => __('Use Image', 'bmcm')
+		));
+		
+		$wysiwyg_settings = array(
 			'textarea_rows' => 6
 		);
 		
-		$index = 0;
-		$total_fields = count($fields);
-		foreach($fields as $key => $field){
+		$multi_settings = array(
+			'sortable' => false
+		);
+		
+		$gallery_settings = array_merge($this->js_vars['defaults'], array(
+			'title' => __('Upload or Choose Your Images', 'bmcm'),
+			'button' => __('Insert Image(s)', 'bmcm'),
+			'library_type' => 'image',
+			'allow_multiple' => true,
+			'target_label' => '',
+			'target_image' => '.media-display img',
+			'target_input' => '.gallery-reference',
+			'target_container' => '.bmcm-gallery',
+			'single_markup' => '<span class="bmcm-gallery-image"><span class="media-display"><img src="" /></span><span class="media-buttons"><a href="#remove-media" class="remove-media">Remove</a></span><input type="hidden" name="%name%" value="" class="gallery-reference" /></span>'
+		));
+		
+		$field['type'] = $this->standardize_type($field['type']);
 			
-			$field['type'] = $this->standardize_type($field['type']);
-			
-			$field = array_merge($defaults, $field);
-			
-			$field['id'] = $this->set_id($key, $field);
-			
-			if(in_array($field['type'], $this->always_serialize)){
-				$field['serialize'] = true;
+		$field = array_merge($defaults, $field);
+		
+		$is_multi = in_array($field['type'], array('multi','multiple','repeat','repeatable')); //TODO: fix this...
+		
+		if($is_multi){
+			$field['serialize'] = true;
+		}
+		
+		if(in_array($field['type'], $this->always_serialize)){
+			$field['serialize'] = true;
+		}
+		
+		$field['id'] = $this->set_id($field, $key);
+		$field['name'] = $this->set_name($field, $key);
+		
+		if($field['type'] == 'money'){
+			$field['before'] = '$'; //TODO: internationalize
+		} elseif($field['type'] == 'file' || $field['type'] == 'upload'){
+			$field['settings'] = array_merge($upload_settings, $field['settings']);
+		} elseif($field['type'] == 'image'){
+			$field['settings'] = array_merge($image_settings, $field['settings']);
+		} elseif($field['type'] == 'wysiwyg'){
+			$field['settings'] = array_merge($wysiwyg_settings, $field['settings']);
+		} elseif($field['type'] == 'multi'){
+			$field['settings'] = array_merge($multi_settings, $field['settings']);
+		} elseif($field['type'] == 'gallery'){
+			$field['settings'] = array_merge($gallery_settings, $field['settings']);
+			$field['settings']['single_markup'] = str_replace('%name%', $field['name'], $field['settings']['single_markup']);
+			$this->js_vars['fields'][$field['id']] = $field['settings'];
+		}
+		
+		if(isset($field['checkboxes'])){
+			$field['options'] = $field['checkboxes'];
+			unset($field['checkboxes']);
+		}
+		if(isset($field['radios'])){
+			$field['options'] = $field['radios'];
+			unset($field['radios']);
+		}
+		
+		if($field['type'] == 'taxonomy' && $field['taxonomy']){
+			$field['settings'] = array_merge(array('hide_empty' => false), $field['settings']);
+			$terms = get_terms($field['taxonomy'], $field['settings']);
+			$field['options'] = array(
+				array('label' => 'Select One', 'value' => '')
+			);
+			foreach($terms as $term){
+				$field['options'][] = array('label' => $term->name, 'value' => $term->term_id);
 			}
-			if($field['type'] == 'money'){
-				$field['before'] = '$';
-			} elseif($field['type'] == 'wysiwyg'){
-				$field['settings'] = array_merge($settings, $field['settings']);
+		}
+		
+		if(!is_array($field['options'])) {
+			$field['options'] = array(
+				array('value' => '', 'label' => __('INVALID OPTIONS PARAMETER', 'bmcm'))
+			);
+		}
+		
+		if($field['type'] == 'date'){
+			$field['attributes'] = array_merge(array('class' => 'datepicker'), $field['attributes']);
+		}
+		
+		$field['value'] = $this->set_value($field);
+		
+		if(isset($field['tab'])){
+			if($this->last_tab != $field['tab']){
+				$this->tab_index = 0;
 			}
-			
-			$field['name'] = BMCM_OPT_PREFIX.$field['id'];
-			
-			if($field['serialize'] && substr($field['name'], -2) != '[]'){
-				$field['name'] = $field['name'].'[]';
+			$this->last_tab = $field['tab'];
+			$field['_tab_index'] = $this->tab_index;
+			$this->tab_index++;
+		}
+		
+		$field['_index'] = $this->index;
+		$field['_total'] = $this->total_fields;
+		
+		if(is_array($field['callbacks']) && count($field['callbacks'])){
+			foreach($field['callbacks'] as $callback){
+				if(isset($field[$callback]) && !empty($field[$callback])){
+					$field[$callback] = call_user_func_array($field[$callback], $field);
+				}
 			}
-			
-			if(isset($field['checkboxes'])){
-				$field['options'] = $field['checkboxes'];
-				unset($field['checkboxes']);
+		}
+		
+		// probably should do this last...
+		if($is_multi){
+			$field = $this->prepare_multiple($field);
+		}
+		
+		return $field;
+	}
+	
+	
+	/**
+	 * prepare_multiple()
+	 * 
+	 * @param mixed $field
+	 * @return
+	 */
+	function prepare_multiple($field){
+		// start a new index for child fields
+		$og_index = $this->index;
+		$og_total = $this->total_fields;
+		
+		$this->index = 0;
+		$this->total_fields = count($field['fields']);
+		
+		// setup the child fields.
+		foreach($field['fields'] as $item_key => $item_field){
+			$item_id = $item_field['id'];
+			$item_field['id'] = $field['id'].'_'.$item_field['id'];
+			$item_field['is_multi'] = true;
+			$field['fields'][$item_key] = $this->cleanup_field($item_field, $item_key);
+			$field['fields'][$item_key]['name'] = str_replace('[]', '', $field['name']).'['.$item_id.'][]';
+			if($this->total_fields == 1){
+				$field['fields'][$item_key]['title'] = $field['title'];
 			}
-			if(isset($field['radios'])){
-				$field['options'] = $field['radios'];
-				unset($field['radios']);
+			$this->index++;
+		}
+		
+		$this->index = $og_index;
+		$this->total_fields = $og_total;
+		
+		$additional = '';
+		
+		if(is_array($field['value'])){
+			
+			$number_of_fields = count($field['fields']);
+			
+			foreach($field['value'] as $i => $val){
+				if($i == 0){
+					// our first fields are already there, re-use them
+					foreach($val as $field_key => $field_val){
+						foreach($field['fields'] as $field_index => $child_field){
+							$check_id = str_replace($field['id'].'_','', $child_field['id']);
+							if($check_id == $field_key){
+								$field['fields'][$field_index]['value'] = $field_val;
+							}
+						}
+					}
+				} else {
+					$new_field = $field;
+					$new_field['type'] = 'multi_additional';
+					
+					// reset the field values from the original
+					foreach($new_field['fields'] as $new_subfield_key => $new_subfield_field){
+						$new_subfield_field['value'] = '';
+						$new_field['fields'][$new_subfield_key] = $new_subfield_field;
+					}
+					
+					$this->index++;
+					$this->total_fields++;
+					$new_field['_index'] = $this->index;
+					$new_field['_total'] = $this->total_fields;
+					if(isset($new_field['tab'])) $new_field['_tab_index']++;
+					//TODO: fix tab total for last multi element.
+					
+					// set the individual field values here
+					foreach($val as $field_key => $field_val){
+						foreach($new_field['fields'] as $field_index => $child_field){
+							$check_id = str_replace($new_field['id'].'_','', $child_field['id']);
+							if($check_id == $field_key){
+								$new_field['fields'][$field_index]['value'] = $field_val;
+							}
+						}
+					}
+					
+					// build the fields, and add to multi_additional output
+					$new_field_output = apply_filters('bmcm_output_field_'.$new_field['type'], $i, $new_field, $this->post, $this);
+					$additional .= apply_filters('bmcm_wrap_field', $new_field_output, $new_field);
+				}
 			}
-			
-			if(is_string($field['options']) && function_exists($field['options'])){
-				$field['options'] = call_user_func($field['options'], $field);
-			} elseif(!is_array($field['options'])) {
-				$field['options'] = array(
-					array('value' => '', 'label' => __('INVALID OPTIONS PARAMETER', 'bmcm'))
-				);
+		}
+		
+		if($additional){
+			$field['additional'] = $additional;
+			// reset total for all fields
+			$field['_total'] = $this->total_fields;
+			foreach($this->fields as $index => $item){
+				$this->fields[$index]['_total'] = $this->total_fields;
 			}
-			
-			$field['value'] = $this->set_value($field, $post);
-			
-			$field['_index'] = $index;
-			$field['_total'] = $total_fields;
-			
-			$output = apply_filters('bmcm_output_field_'.$field['type'], $key, $field, $post, $this);
-			$element = apply_filters('bmcm_wrap_field', $output, $field);
-			
-			echo $element;
-			$index++;
+		}
+		
+		return $field;
+	}
+	
+	function add_tab_totals(){
+		$last_tab = 0;
+		foreach($this->fields as $key => $field){
+			if(isset($field['tab']) && $field['_tab_index'] == 0 && $field['_index'] > 0){
+				$parts = array_slice($this->fields, $last_tab, $field['_index'], true);
+				$total_parts = count($parts);
+				foreach($parts as $index => $part){
+					$this->fields[$index]['_tab_total'] = $total_parts;
+				}
+				$last_tab = $field['_index'];
+			}
+		}
+		
+		$total_tabs = count($this->fields);
+		$last_section = $total_tabs - $last_tab+1;
+		if($last_section){
+			$parts = array_slice($this->fields, $last_tab+1, $last_section, true);
+			$total_parts = count($parts);
+			foreach($parts as $index => $part){
+				$this->fields[$index]['_tab_total'] = $total_parts;
+			}
 		}
 	}
 	
@@ -268,7 +577,7 @@ class BM_Custom_Metaboxes {
 	 * @param mixed $field
 	 * @return
 	 */
-	function set_id($key, $field){
+	function set_id($field, $key=NULL){
 		$id = !$field['id'] ? $key : $field['id'];
 		
 		if(is_numeric($id)){
@@ -277,6 +586,21 @@ class BM_Custom_Metaboxes {
 			}
 		}
 		return $id;
+	}
+	
+	function set_name($field, $key=NULL){
+		$base_name = BMCM_OPT_PREFIX.$field['id'];
+		$name = $base_name;
+		
+		if($field['serialize'] && substr($name, -2) != '[]'){
+			$name .= '[]';
+		}
+		
+		if(isset($field['is_multi']) && substr($name, -2) != '[]'){
+			$name .= '[]';
+		}
+		
+		return $name;
 	}
 	
 	function standardize_type($type){
@@ -298,13 +622,19 @@ class BM_Custom_Metaboxes {
 	 * @param mixed $post
 	 * @return
 	 */
-	function set_value($field, $post){
+	function set_value($field, $parent=NULL){
 		$value = ($field['default']) ? $field['default'] : '';
 		
-		if($post->ID){
-			$stored = get_post_meta($post->ID, $field['id'], false);
-			if(count($stored)){
-				$value = $stored[0];
+		if($this->post->ID){
+			if($field['type'] == 'taxonomy' && $field['taxonomy']){
+				$terms = wp_get_post_terms( $this->post->ID, $field['taxonomy']);
+				if(count($terms))
+					$value = $terms[0]->term_id;
+			} else {
+				$stored = get_post_meta($this->post->ID, $field['id'], false);
+				if(count($stored)){
+					$value = $stored[0];
+				}
 			}
 		}
 		
@@ -327,38 +657,122 @@ class BM_Custom_Metaboxes {
 	 */
 	function save_values($post_id){
 		if(isset($_POST) && count($_POST) > 0){
-			$reset_fields = $this->get_reset_fields();
+			$multi_fields = $this->get_fields(array('multi','multiple','repeat','repeatable')); //TODO: fix this...
+			$reset_fields = $this->get_fields(array('checkboxes','checkbox'));
+			$taxonomy_fields = $this->get_fields(array('taxonomy'), 'taxonomy');
+			
 			foreach($_POST as $k => $v){
 				if(substr($k, 0, strlen(BMCM_OPT_PREFIX)) == BMCM_OPT_PREFIX){
+					$v = is_array($v) ? $this->recursive_sanitize($v) : sanitize_text_field($v);
 					$name = substr($k, strlen(BMCM_OPT_PREFIX));
+					
 					if(($del = array_search($name, $reset_fields)) !== false) {
 						unset($reset_fields[$del]);
 					}
+					$save = true;
+					if(($multi = array_search($name, $multi_fields)) !== false){
+						$new_val = array();
+						$save = false;
+						
+						//rewrite the post array
+						foreach($v as $var => $vals){
+							foreach($vals as $index => $val){
+								if($val) $save = true;
+								$new_val[$index][$var] = $val;
+							}
+						}
+						
+						$v = $new_val;
+					}
+					
 					$v = apply_filters('bmcm_update_meta', $v, $post_id, $name, $this);
-					update_post_meta( $post_id, $name, $v );
+					
+					if(in_array($name, $taxonomy_fields) && $taxonomy = array_search($name, $taxonomy_fields)){
+						wp_set_post_terms( $post_id, $v, $taxonomy );
+					} else {
+						if($save){
+							update_post_meta( $post_id, $name, $v );
+						} else {
+							delete_post_meta( $post_id, $name );
+						}
+					}
 				}
 			}
+			
 			foreach($reset_fields as $field){
-				update_post_meta( $post_id, $field, array() );
+				 // this used to update to an empty array. not sure if this will be better. needs testing.
+				delete_post_meta( $post_id, $field );
 			}
 		}
 	}
 	
 	/**
-	 * BM_Custom_Metaboxes::get_reset_fields()
+	 * BM_Custom_Metaboxes::recursive_sanitize()
 	 * 
+	 * @param mixed $array
 	 * @return
 	 */
-	function get_reset_fields(){
-		$reset_fields = array();
+	function recursive_sanitize($array=array()){
+		if(is_string($array)){
+			return sanitize_text_field($array);
+		} elseif(is_array($array)){
+			$new_array = array();
+			foreach($array as $k => $v){
+				$new_array[$k] = $this->recursive_sanitize($v);
+			}
+			return $new_array;
+		}
+		return $array;
+	}
+	
+	/**
+	 * BM_Custom_Metaboxes::get_fields()
+	 * 
+	 * @param mixed $types
+	 * @return
+	 */
+	function get_fields($types=array(), $key_val=NULL){
+		if(!is_array($types)) $types = array($types);
+		
+		$fields = array();
 		foreach($this->metaboxes as $metabox){
-			foreach($metabox['fields'] as $key => $field){
-				if($field['type'] == 'checkboxes' || $field['type'] == 'checkbox'){
-					$id = $this->set_id($key, $field);
-					$reset_fields[] = $id;
+			if(!is_array($metabox['post_type'])){
+				$metabox['post_type'] = array($metabox['post_type']);
+			}
+			if(in_array(get_post_type(), $metabox['post_type'])){ //TODO: support nested multi fields here.
+				foreach($metabox['fields'] as $key => $field){
+					if(in_array($field['type'], $types)){
+						$id = $this->set_id($field, $key);
+						if($key_val){
+							$fields[$field[$key_val]] = $id;
+						} else {
+							$fields[] = $id;
+						}
+					}
 				}
 			}
 		}
-		return $reset_fields;
+		return $fields;
+	}
+	
+	
+	
+	function _check_for_updates(){
+		if(class_exists('WP_GitHub_Updater')){
+			$config = array(
+				'slug' => 'bmoney-custom-metaboxes/bmoney-custom-metaboxes.plugin.php', // this is the slug of your plugin
+				'proper_folder_name' => 'bmoney-custom-metaboxes', // this is the name of the folder your plugin lives in
+				'api_url' => 'https://api.github.com/solepixel/bmoney-custom-metaboxes', // the github API url of your github repo
+				'raw_url' => 'https://raw.github.com/solepixel/bmoney-custom-metaboxes/master/', // the github raw url of your github repo
+				'github_url' => 'https://github.com/solepixel/bmoney-custom-metaboxes', // the github url of your github repo
+				'zip_url' => 'https://github.com/solepixel/bmoney-custom-metaboxes/archive/master.zip', // the zip url of the github repo
+				'sslverify' => false, // wether WP should check the validity of the SSL cert when getting an update, see https://github.com/jkudish/WordPress-GitHub-Plugin-Updater/issues/2 and https://github.com/jkudish/WordPress-GitHub-Plugin-Updater/issues/4 for details
+				'requires' => '3.0', // which version of WordPress does your plugin require?
+				'tested' => '3.5', // which version of WordPress is your plugin tested up to?
+				'readme' => 'README.md', // which file to use as the readme for the version number
+				'access_token' => '', // Access private repositories by authorizing under Appearance > Github Updates when this example plugin is installed
+			);
+			new WP_GitHub_Updater($config);
+		}
 	}
 }
