@@ -3,12 +3,20 @@
  * Plugin Name: BMoney Custom Metaboxes
  * Plugin URI: https://github.com/solepixel/bmoney-custom-metaboxes/
  * Description: Easily add custom metaboxes to your post types
+<<<<<<< HEAD
  * Version: 1.533
+=======
+ * Version: 1.532
+>>>>>>> 0ab471a11a99535494d6a481b78829f86bfadc20
  * Author: Brian DiChiara
  * Author URI: http://www.briandichiara.com
  */
 
+<<<<<<< HEAD
 define('BMCM_VERSION', '1.533');
+=======
+define('BMCM_VERSION', '1.532');
+>>>>>>> 0ab471a11a99535494d6a481b78829f86bfadc20
 define('BMCM_PI_NAME', 'Custom Metaboxes');
 define('BMCM_PI_DESCRIPTION', 'Easily add custom metaboxes to your post types');
 define('BMCM_OPT_PREFIX', 'bmcm_');
