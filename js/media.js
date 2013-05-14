@@ -7,11 +7,6 @@
  * @author  Brian DiChiara
  */
 jQuery(function($){
-<<<<<<< HEAD
-	
-=======
-	var bmcm_media_vars = bmcm_media_vars ? bmcm_media_vars : {};
->>>>>>> 0ab471a11a99535494d6a481b78829f86bfadc20
 	if(bmcm_media_vars){
 		window.bmcm_callbacks = {
 			select: bmcm_media_vars.selection_callback,
