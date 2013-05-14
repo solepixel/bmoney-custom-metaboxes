@@ -40,6 +40,7 @@ class BM_Custom_Metaboxes {
 	function initialize(){
 		add_action( 'init', array($this, '_init'));
 		add_action( 'admin_init', array($this, 'build_metaboxes'), 9999 );
+		add_action( 'admin_footer', array($this, 'finalize'));
 	}
 	
 	/**
@@ -81,7 +82,6 @@ class BM_Custom_Metaboxes {
 			
 			wp_register_style('bmcm-styles', BMCM_DIR.'css/bmcm-styles.css', array(), BMCM_VERSION);
 			wp_register_script('bmcm-scripts', BMCM_DIR.'js/bmcm-scripts.js', array('jquery'), BMCM_VERSION);
-	        wp_register_script('bmcm-media', BMCM_DIR.'js/media.js', array('jquery','media-upload','media-views'), BMCM_VERSION, true);
 	        wp_register_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/flick/jquery-ui.css', array(), '1.9.1');
 				
 			#add_action('admin_menu', array($this, '_admin_menu'));
@@ -100,7 +100,6 @@ class BM_Custom_Metaboxes {
 		wp_enqueue_media();
 		wp_enqueue_style('bmcm-styles');
 		wp_enqueue_script('bmcm-scripts');
-		wp_enqueue_script('bmcm-media');
 		wp_enqueue_script('jquery-ui-datepicker');
 		wp_enqueue_script('jquery-ui-slider');
 		wp_enqueue_script('jquery-ui-tooltip');
@@ -298,9 +297,6 @@ class BM_Custom_Metaboxes {
 		}
 		
 		echo '<div class="clear"><!-- .clear --></div>';
-		
-		
-		wp_localize_script('bmcm-media', 'bmcm_media_vars', apply_filters('bmcm_js_vars', $this->js_vars));
 	}
 	
 	
@@ -380,8 +376,10 @@ class BM_Custom_Metaboxes {
 			$field['before'] = '$'; //TODO: internationalize
 		} elseif($field['type'] == 'file' || $field['type'] == 'upload'){
 			$field['settings'] = array_merge($upload_settings, $field['settings']);
+			$this->js_vars['fields'][$field['id']] = $field['settings'];
 		} elseif($field['type'] == 'image'){
 			$field['settings'] = array_merge($image_settings, $field['settings']);
+			$this->js_vars['fields'][$field['id']] = $field['settings'];
 		} elseif($field['type'] == 'wysiwyg'){
 			$field['settings'] = array_merge($wysiwyg_settings, $field['settings']);
 		} elseif($field['type'] == 'multi'){
@@ -756,7 +754,23 @@ class BM_Custom_Metaboxes {
 	}
 	
 	
+	/**
+	 * finalize()
+	 * 
+	 * @return void
+	 */
+	function finalize(){
+		wp_register_script('bmcm-media', BMCM_DIR.'js/media.js', array('jquery','media-upload','media-views'), BMCM_VERSION, true);
+		wp_localize_script('bmcm-media', 'bmcm_media_vars', apply_filters('bmcm_js_vars', $this->js_vars));
+		wp_enqueue_script('bmcm-media');
+	}
 	
+	
+	/**
+	 * _check_for_updates()
+	 * 
+	 * @return void
+	 */
 	function _check_for_updates(){
 		if(class_exists('WP_GitHub_Updater')){
 			$config = array(

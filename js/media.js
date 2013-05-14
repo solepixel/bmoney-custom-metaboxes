@@ -8,12 +8,14 @@
  */
 jQuery(function($){
 	
-    window.bmcm_callbacks = {
-    	select: bmcm_media_vars.selection_callback,
-    	remove: bmcm_media_vars.remove_callback
-    }
+	if(bmcm_media_vars){
+		window.bmcm_callbacks = {
+			select: bmcm_media_vars.selection_callback,
+			remove: bmcm_media_vars.remove_callback
+		}
+	}
     
-   $('.bmcm-media').live('click',function(e){
+	$('.bmcm-media').live('click',function(e){
 		var $button = $(this);
         
         if ( $button.media_frame ) {
