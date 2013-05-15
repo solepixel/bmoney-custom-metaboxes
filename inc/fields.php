@@ -104,19 +104,20 @@ function bmcm_text($key, $field, $post, $bmcm){
 	$output = '<label>';
 		if($title) $output .= '<span class="label">'.$title.'</span>';
 		$output .= '<span class="field">';
-		if($before) $output .= '<span class="before">'.$before.'</span>';
-		if($field['type'] == 'url' && $value) $output .= '<a href="'.$value.'" class="bmcm-url-link" target="_blank">Link</a>';
-		$output .= '<input type="'.$type.'" name="'.$name.'"';
-		if($value || $value === '0'){
-			$output .= ' value="'.$value.'"';
-		}
-		$output .= bmcm_attributes($attributes);
-		$output .= '/>';
-		if($after) $output .= '<span class="after">'.$after.'</span>';
+			if($field['type'] == 'url' && $value) $output .= '<a href="'.$value.'" class="bmcm-url-link" target="_blank">Link</a>';
+			
+			if($before) $output .= '<span class="before">'.$before.'</span>';
+			$output .= '<input type="'.$type.'" name="'.$name.'"';
+				if($value || $value === '0'){
+					$output .= ' value="'.$value.'"';
+				}
+				$output .= bmcm_attributes($attributes);
+			$output .= '/>';
+			if($after) $output .= '<span class="after">'.$after.'</span>';
+			
 		$output .= '</span>';
-		if($description){
-			$output .= '<span class="description">'.$description.'</span>';
-		}
+		
+		if($description) $output .= '<span class="description">'.$description.'</span>';
 	$output .= '</label>';
 	return $output;
 }
@@ -134,13 +135,14 @@ function bmcm_textarea($key, $field, $post, $bmcm){
 	extract($field);
 	$output = '<label>';
 		if($title) $output .= '<span class="label">'.$title.'</span>';
-		$output .= '<span class="field"><textarea name="'.$name.'"';
-		$output .= bmcm_attributes($attributes);
-		$output .= '>'.htmlspecialchars($value).'</textarea>';
-		if($description){
-			$output .= '<span class="description">'.$description.'</span>';
-		}
+		$output .= '<span class="field">';
+			if($before) $output .= '<span class="before">'.$before.'</span>';
+			$output .= '<textarea name="'.$name.'"';
+				$output .= bmcm_attributes($attributes);
+			$output .= '>'.htmlspecialchars($value).'</textarea>';
+			if($after) $output .= '<span class="after">'.$after.'</span>';
 		$output .= '</span>';
+		if($description) $output .= '<span class="description">'.$description.'</span>';
 	$output .= '</label>';
 	return $output;
 }
@@ -160,31 +162,33 @@ function bmcm_select($key, $field, $post, $bmcm){
 	
 	$output = '<label>';
 		if($title) $output .= '<span class="label">'.$title.'</span>';
-		$output .= '<span class="field"><select name="'.$name.'"';
-		$output .= bmcm_attributes($attributes);
-		$output .= '>';
-			foreach($options as $opt){
-				extract(bmcm_option_array($opt));
-				if($grp != $group){
-					if($group != NULL) $output .= '</optgroup>';
-					$group = $grp;
-					if($grp && $lbl){
-						$output .= '<optgroup label="'.$lbl.'">';
+		$output .= '<span class="field">';
+			if($before) $output .= '<span class="before">'.$before.'</span>';
+			$output .= '<select name="'.$name.'"';
+			$output .= bmcm_attributes($attributes);
+			$output .= '>';
+				foreach($options as $opt){
+					extract(bmcm_option_array($opt));
+					if($grp != $group){
+						if($group != NULL) $output .= '</optgroup>';
+						$group = $grp;
+						if($grp && $lbl){
+							$output .= '<optgroup label="'.$lbl.'">';
+						} else {
+							$group = NULL;
+						}
 					} else {
-						$group = NULL;
+						$output .= '<option value="'.$val.'"';
+							if($val == $value) $output .= ' selected="selected"';
+							if($disable) $output .= ' disabled="disabled"';
+						$output .= '>'.$lbl.'</option>';
 					}
-				} else {
-					$output .= '<option value="'.$val.'"';
-						if($val == $value) $output .= ' selected="selected"';
-						if($disable) $output .= ' disabled="disabled"';
-					$output .= '>'.$lbl.'</option>';
 				}
-			}
-			if($group != NULL) $output .= '</optgroup>';
-		$output .= '</select></span>';
-		if($description){
-			$output .= '<span class="description">'.$description.'</span>';
-		}
+				if($group != NULL) $output .= '</optgroup>';
+			$output .= '</select>';
+			if($after) $output .= '<span class="after">'.$after.'</span>';
+		$output .= '</span>';
+		if($description) $output .= '<span class="description">'.$description.'</span>';
 	$output .= '</label>';
 	return $output;
 }
@@ -205,15 +209,15 @@ function bmcm_checkbox($key, $field, $post, $bmcm){
 	$val = ($val) ? $val : 1;
 	$output = '<label class="checkbox">';
 		$output .= '<span class="field">';
+			if($before) $output .= '<span class="before">'.$before.'</span>';
 			$output .= '<input type="checkbox" name="'.$name.'" value="'.$val.'"';
 			if($value == $val) $output .= ' checked="checked"';
 			$output .= bmcm_attributes($attributes);
 			$output .= '/>';
+			if($after) $output .= '<span class="after">'.$after.'</span>';
 		$output .= '</span>';
 		$output .= '<span class="label">'.$title.'</span>';
-		if($description){
-			$output .= '<span class="description">'.$description.'</span>';
-		}
+		if($description) $output .= '<span class="description">'.$description.'</span>';
 	$output .= '</label>';
 	return $output;
 }
@@ -236,6 +240,7 @@ function bmcm_checkboxes($key, $field, $post, $bmcm){
 	
 	$output = '<div class="cbx_wrap">';
 		if($title) $output .= '<span class="label">'.$title.'</span>';
+		if($before) $output .= '<span class="before">'.$before.'</span>';
 		$output .= '<ul class="cbxs '.$type.'">';
 			foreach($options as $opt){
 				extract(bmcm_option_array($opt));
@@ -245,9 +250,8 @@ function bmcm_checkboxes($key, $field, $post, $bmcm){
 				$output .= ' /> '.$lbl.'</label></li>';
 			}
 		$output .= '</ul>';
-		if($description){
-			$output .= '<span class="description">'.$description.'</span>';
-		}
+		if($after) $output .= '<span class="after">'.$after.'</span>';
+		if($description) $output .= '<span class="description">'.$description.'</span>';
 	$output .= '</div>';
 	return $output;
 }
@@ -268,6 +272,7 @@ function bmcm_upload($key, $field, $post, $bmcm){
 	$output = '<div class="upload_wrap">';
 		if($title) $output .= '<span class="label">'.$title.'</span>';
 		$output .= '<span class="field">';
+			if($before) $output .= '<span class="before">'.$before.'</span>';
 			$output .= '<input type="button" value="Select Media" id="'.$id.'" class="button bmcm-media" />';
 			$output .= '<input type="hidden" name="'.$name.'" class="media-reference"';
 			if($value || $value === '0'){
@@ -279,9 +284,11 @@ function bmcm_upload($key, $field, $post, $bmcm){
 			$output .= ' />';
 			$output .= '<span class="media-display">'.$filename.'</span>';
 			$output .= '<span class="media-buttons"><a href="#remove-media" class="remove-media">Remove</a></span>';
-			if($description)
-				$output .= '<span class="description">'.$description.'</span>';
+			if($after) $output .= '<span class="after">'.$after.'</span>';
 		$output .= '</span>';
+		
+		if($description) $output .= '<span class="description">'.$description.'</span>';
+		
 	$output .= '</div>';
     return $output;
 }
@@ -304,7 +311,10 @@ function bmcm_wysiwyg($key, $field, $post, $bmcm){
 			wp_editor( $value, $name, $settings );
 			$output .= ob_get_contents();
 			ob_end_clean();
+			if($after) $output .= '<span class="after">'.$after.'</span>';
 		$output .= '</div>';
+		
+		if($description) $output .= '<span class="description">'.$description.'</span>';
 	$output .= '</div>';
 	
 	return $output;
@@ -325,30 +335,39 @@ function bmcm_slider($key, $field, $post, $bmcm){
 	$output = '<div class="slider_wrap">';
 		if($title) $output .= '<span class="label">'.$title.'</span>';
 		$output .= '<span class="field">';
+			if($before) $output .= '<span class="before">'.$before.'</span>';
 			$output .= '<span class="ui-slider"></span>';
 			$output .= '<input type="hidden" name="'.$name.'" class="slider-percent"';
 			if($value || $value === '0'){
 				$output .= ' value="'.$value.'"';
 			}
 			$output .= ' />';
-			if($description)
-				$output .= '<span class="description">'.$description.'</span>';
+			if($after) $output .= '<span class="after">'.$after.'</span>';
 		$output .= '</span>';
+		if($description) $output .= '<span class="description">'.$description.'</span>';
 	$output .= '</div>';
     return $output;
 }
 
 
 
+/**
+ * bmcm_gallery()
+ * 
+ * @param mixed $key
+ * @param mixed $field
+ * @param mixed $post
+ * @param mixed $bmcm
+ * @return
+ */
 function bmcm_gallery($key, $field, $post, $bmcm){
 	extract($field);
 	$output = '<div class="gallery_wrap">';
 		if($title) $output .= '<span class="label">'.$title.'</span>';
 		$output .= '<span class="field">';
 			$output .= '<input type="button" value="Add Images" id="'.$id.'" class="button bmcm-media" />';
-			if($description)
-				$output .= '<span class="description">'.$description.'</span>';
-				
+			if($description) $output .= '<span class="description">'.$description.'</span>';
+			if($before) $output .= '<span class="before">'.$before.'</span>';
 			$images = is_array($value) ? $value : array($value);
 			$output .= '<span class="bmcm-gallery">';
 				if(count($images)){
@@ -366,7 +385,9 @@ function bmcm_gallery($key, $field, $post, $bmcm){
 					}
 				}
 			$output .= '</span>';
+			if($after) $output .= '<span class="after">'.$after.'</span>';
 		$output .= '</span>';
+		
 	$output .= '</div>';
     return $output;
 }
