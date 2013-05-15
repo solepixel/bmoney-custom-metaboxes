@@ -133,6 +133,9 @@
 	display:none;
 }
 
+.bmcm-sidebar-wrap {
+	padding:6px 8px;
+}
 
 .media-display {
 	padding:0 15px;
