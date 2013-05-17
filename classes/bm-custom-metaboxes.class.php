@@ -97,13 +97,14 @@ class BM_Custom_Metaboxes {
 	 * @return void
 	 */
 	function enqueue_admin_scripts(){
-		wp_enqueue_media();
 		wp_enqueue_style('bmcm-styles');
 		wp_enqueue_script('bmcm-scripts');
 		wp_enqueue_script('jquery-ui-datepicker');
 		wp_enqueue_script('jquery-ui-slider');
 		wp_enqueue_script('jquery-ui-tooltip');
 		wp_enqueue_style('jquery-style');
+		
+		if(!did_action( 'wp_enqueue_media' )) wp_enqueue_media();
 	}
 	
 	/**
