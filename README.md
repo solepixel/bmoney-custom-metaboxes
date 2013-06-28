@@ -16,6 +16,7 @@ Changelog
 * Added new parameter "display" to metabox. Accepts boolean
 * Added new field type "code" and supports HTML
 * Added Section break heading
+* Adjusted priorities for loading metaboxes to optimize theme support
 * Bug fix when removing all gallery metabox items
 
 ### 1.535
