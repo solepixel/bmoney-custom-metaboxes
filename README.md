@@ -3,7 +3,7 @@ BMoney Custom Metaboxes
 
 This is a plugin for WordPress that allows developers to easily add meta boxes with custom fields into their posts or pages. It was originally inspired by Jared Atchison [Custom Metaboxes and Fields for WordPress](https://github.com/jaredatch/Custom-Metaboxes-and-Fields-for-WordPress) however since the release of WordPress 3.5 I wanted to write my own that allowed the meta boxes to be much more "hookable" as well as compatible with the new Media API. This plugin is requires WordPress 3.5+ and is updated frequently. Please donate (links in the wiki) if you have requests or want to keep this project going! Thanks!
 
-~Current Version:1.535~
+~Current Version:1.536~
 
 Documentation: <https://github.com/solepixel/bmoney-custom-metaboxes/wiki>
 
@@ -12,6 +12,11 @@ Please visit the documentation link above for examples and other information on 
 
 Changelog
 ===========
+### 1.536
+* Added new parameter "display" to metabox. Accepts boolean
+* Added new field type "code" and supports HTML
+* Bug fix when removing all gallery metabox items
+
 ### 1.535
 * Fixed a bug with enqueue media causing problems with featured image dialog
 

@@ -139,7 +139,7 @@ function bmcm_textarea($key, $field, $post, $bmcm){
 			if($before) $output .= '<span class="before">'.$before.'</span>';
 			$output .= '<textarea name="'.$name.'"';
 				$output .= bmcm_attributes($attributes);
-			$output .= '>'.htmlspecialchars($value).'</textarea>';
+			$output .= '>'.esc_textarea($value).'</textarea>';
 			if($after) $output .= '<span class="after">'.$after.'</span>';
 		$output .= '</span>';
 		if($description) $output .= '<span class="description">'.$description.'</span>';

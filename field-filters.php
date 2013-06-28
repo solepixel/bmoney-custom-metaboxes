@@ -17,6 +17,7 @@ add_filter('bmcm_output_field_money', 'bmcm_text', 10, 4);
 add_filter('bmcm_output_field_password', 'bmcm_text', 10, 4);
 
 add_filter('bmcm_output_field_textarea', 'bmcm_textarea', 10, 4);
+add_filter('bmcm_output_field_code', 'bmcm_textarea', 10, 4);
 add_filter('bmcm_output_field_wysiwyg', 'bmcm_wysiwyg', 10, 4);
 
 add_filter('bmcm_output_field_select', 'bmcm_select', 10, 4);

@@ -39,6 +39,7 @@ class BM_Custom_Metaboxes {
 	 */
 	function initialize(){
 		add_action( 'init', array($this, '_init'));
+		add_action( 'wp_loaded', array($this, 'setup_metaboxes'), 9999 );
 		add_action( 'admin_init', array($this, 'build_metaboxes'), 9999 );
 		add_action( 'admin_footer', array($this, 'finalize'));
 	}
@@ -85,7 +86,6 @@ class BM_Custom_Metaboxes {
 	        wp_register_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/flick/jquery-ui.css', array(), '1.9.1');
 				
 			#add_action('admin_menu', array($this, '_admin_menu'));
-			add_action('admin_init', array($this, 'setup_metaboxes'));
 			add_action('save_post', array($this, 'save_values') );
 		}
 		
@@ -179,6 +179,7 @@ class BM_Custom_Metaboxes {
 					if(!isset($metabox['priority'])) $metabox['priority'] = 'high';
 					if(!isset($metabox['fields'])) $metabox['fields'] = array();
 					if(!isset($metabox['tabs'])) $metabox['tabs'] = array();
+					if(!isset($metabox['display'])) $metabox['display'] = true;
 					
 					// use our default callback.
 					if(!isset($metabox['callback'])) $metabox['callback'] = array(&$this, 'metabox_callback');
@@ -198,18 +199,20 @@ class BM_Custom_Metaboxes {
 					}
 					
 					foreach($metabox['post_type'] as $post_type){
-						add_filter('postbox_classes_'.$post_type.'_'.$metabox['id'],
-							create_function('', 'global $'.$mb_id.'_postbox_class; return $'.$mb_id.'_postbox_class;') );
-							
-						add_meta_box(
-							$metabox['id'],
-							$metabox['title'],
-							$metabox['callback'],
-							$post_type,
-							$metabox['context'],
-							$metabox['priority'],
-							array('fields' => $metabox['fields'], 'tabs' => $metabox['tabs'])
-						);
+						if($metabox['display']){
+							add_filter('postbox_classes_'.$post_type.'_'.$metabox['id'],
+								create_function('', 'global $'.$mb_id.'_postbox_class; return $'.$mb_id.'_postbox_class;') );
+								
+							add_meta_box(
+								$metabox['id'],
+								$metabox['title'],
+								$metabox['callback'],
+								$post_type,
+								$metabox['context'],
+								$metabox['priority'],
+								array('fields' => $metabox['fields'], 'tabs' => $metabox['tabs'])
+							);
+						}
 					}
 				}
 			}
@@ -648,6 +651,26 @@ class BM_Custom_Metaboxes {
 		return apply_filters('bmcm_value_'.$field['id'], $value, $field, $this);
 	}
 	
+	
+	/**
+	 * sanitize_value()
+	 * 
+	 * @param mixed $value
+	 * @param mixed $name
+	 * @return
+	 */
+	function sanitize_value($value, $name){
+		$code_fields = $this->get_fields(array('code'));
+		
+		if(in_array($name, $code_fields)){
+			$value = htmlspecialchars_decode(sanitize_text_field(esc_html($value)));
+		} else {
+			$value = is_array($value) ? $this->recursive_sanitize($value) : sanitize_text_field($value);
+		}
+		
+		return $value;
+	}
+	
 	/**
 	 * BM_Custom_Metaboxes::save_values()
 	 * 
@@ -657,13 +680,14 @@ class BM_Custom_Metaboxes {
 	function save_values($post_id){
 		if(isset($_POST) && count($_POST) > 0){
 			$multi_fields = $this->get_fields(array('multi','multiple','repeat','repeatable')); //TODO: fix this...
-			$reset_fields = $this->get_fields(array('checkboxes','checkbox'));
+			$reset_fields = $this->get_fields(array('checkboxes','checkbox','gallery'));
 			$taxonomy_fields = $this->get_fields(array('taxonomy'), 'taxonomy');
 			
 			foreach($_POST as $k => $v){
 				if(substr($k, 0, strlen(BMCM_OPT_PREFIX)) == BMCM_OPT_PREFIX){
-					$v = is_array($v) ? $this->recursive_sanitize($v) : sanitize_text_field($v);
 					$name = substr($k, strlen(BMCM_OPT_PREFIX));
+					
+					$v = $this->sanitize_value($v, $name);
 					
 					if(($del = array_search($name, $reset_fields)) !== false) {
 						unset($reset_fields[$del]);
