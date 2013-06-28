@@ -59,6 +59,7 @@ function bmcm_wrap_field($output, $field){
 function bmcm_section_break($key, $field, $post, $bmcm){
 	extract($field);
 	$output = '<hr id="'.$id.'" class="section-break" />';
+	if($title) $output .= '<h4 class="section-title">'.$title.'</h4>';
 	return $output;
 }
 
